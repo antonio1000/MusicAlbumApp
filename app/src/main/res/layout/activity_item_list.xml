@@ -19,6 +19,14 @@
             android:layout_height="?attr/actionBarSize"
             app:popupTheme="@style/AppTheme.PopupOverlay" />
 
+        <EditText
+            android:id="@+id/searchText"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Scrivi cosa vuoi cercare..."
+            android:textSize="20sp"/>
+
+
     </android.support.design.widget.AppBarLayout>
 
     <FrameLayout

@@ -1,21 +1,35 @@
 package com.example.antoniolinguaglossa.musicalbumapp
 
 import android.content.Intent
+import android.os.AsyncTask
+import android.os.Build
 import android.os.Bundle
+import android.support.annotation.RequiresApi
 import android.support.v7.app.AppCompatActivity
 import android.support.v7.widget.RecyclerView
 import android.support.design.widget.Snackbar
+import android.system.Os.bind
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
+import android.widget.Toast
+import butterknife.BindView
+import com.example.antoniolinguaglossa.musicalbumapp.api.BackendServiceHeaderMap
+import com.example.antoniolinguaglossa.musicalbumapp.api.JournalerBackendService
+import com.example.antoniolinguaglossa.musicalbumapp.api.TokenManager
+import com.example.antoniolinguaglossa.musicalbumapp.api.UserLoginRequest
 
 import com.example.antoniolinguaglossa.musicalbumapp.dummy.DummyContent
+import io.reactivex.disposables.Disposable
+import io.reactivex.schedulers.Schedulers
 import kotlinx.android.synthetic.main.activity_item_list.*
 import kotlinx.android.synthetic.main.item_list_content.view.*
 
 import kotlinx.android.synthetic.main.item_list.*
 
+@RequiresApi(Build.VERSION_CODES.LOLLIPOP)
 /**
  * An activity representing a list of Pings. This activity
  * has different presentations for handset and tablet-size devices. On
@@ -30,7 +44,12 @@ class ItemListActivity : AppCompatActivity() {
      * Whether or not the activity is in two-pane mode, i.e. running on a tablet
      * device.
      */
+
+
     private var mTwoPane: Boolean = false
+
+    @BindView(R.id.searchText)
+    var textView1: TextView? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -42,6 +61,7 @@ class ItemListActivity : AppCompatActivity() {
         fab.setOnClickListener { view ->
             Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
                     .setAction("Action", null).show()
+                    AsyncTaskExample().execute();
         }
 
         if (item_detail_container != null) {
@@ -112,6 +132,67 @@ class ItemListActivity : AppCompatActivity() {
         inner class ViewHolder(mView: View) : RecyclerView.ViewHolder(mView) {
             val mIdView: TextView = mView.id_text
             val mContentView: TextView = mView.content
+        }
+    }
+
+    /**
+     * Authenticates user synchronously,
+     * then executes async calls for notes and TODOs fetching.
+     * Pay attention on synchronously triggered call via execute() method.
+     * Its asynchronous equivalent is: enqueue().
+     */
+    private fun startMe() {
+        //executor.execute {
+            Log.i("tag", "Synchronizing data [ START ]")
+            var headers = BackendServiceHeaderMap.obtain()
+            val service = JournalerBackendService.obtain()
+            //val credentials = UserLoginRequest("username", "password")
+            //val tokenResponse = service
+            //        .login(headers, credentials)
+            //        .execute()
+            val tokenResponse = service
+                    .getResults("Zucchero")
+                    .execute()
+            //if (tokenResponse.isSuccessful) {
+            //    val token = tokenResponse.body()
+            //    token?.let {
+            //        TokenManager.currentToken = token
+            //        headers = BackendServiceHeaderMap.obtain(true)
+                    //fetchNotes(service, headers)
+                    //fetchTodos(service, headers)
+            //    }
+            //}
+
+            Log.i("tag", "Synchronizing data [ END ]")
+        //}
+    }
+
+    inner class AsyncTaskExample: AsyncTask<String, String, String>() {
+
+        override fun onPreExecute() {
+            super.onPreExecute()
+            //MyprogressBar.visibility = View.VISIBLE;
+        }
+
+        override fun doInBackground(vararg p0: String?): String {
+
+            var Result: String = "";
+            //It will return current data and time.
+            startMe()
+
+            return Result
+        }
+
+        override fun onPostExecute(result: String?) {
+            super.onPostExecute(result)
+
+            //MyprogressBar.visibility = View.INVISIBLE;
+
+            if (result == "") {
+                Log.i("network", "Network Error...Is OK");
+            } else {
+                Log.i("network", result);
+            }
         }
     }
 }

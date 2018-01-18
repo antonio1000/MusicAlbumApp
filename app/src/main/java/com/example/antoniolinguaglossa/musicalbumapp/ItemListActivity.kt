@@ -5,29 +5,22 @@ import android.os.AsyncTask
 import android.os.Build
 import android.os.Bundle
 import android.support.annotation.RequiresApi
+import android.support.design.widget.Snackbar
 import android.support.v7.app.AppCompatActivity
 import android.support.v7.widget.RecyclerView
-import android.support.design.widget.Snackbar
-import android.system.Os.bind
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
-import android.widget.Toast
 import butterknife.BindView
 import com.example.antoniolinguaglossa.musicalbumapp.api.BackendServiceHeaderMap
-import com.example.antoniolinguaglossa.musicalbumapp.api.JournalerBackendService
-import com.example.antoniolinguaglossa.musicalbumapp.api.TokenManager
-import com.example.antoniolinguaglossa.musicalbumapp.api.UserLoginRequest
-
 import com.example.antoniolinguaglossa.musicalbumapp.dummy.DummyContent
-import io.reactivex.disposables.Disposable
-import io.reactivex.schedulers.Schedulers
+import com.example.antoniolinguaglossa.musicalbumapp.model.ResultCont
+import com.example.antoniolinguaglossa.musicalbumapp.util.SingletonRetrofit
 import kotlinx.android.synthetic.main.activity_item_list.*
-import kotlinx.android.synthetic.main.item_list_content.view.*
-
 import kotlinx.android.synthetic.main.item_list.*
+import kotlinx.android.synthetic.main.item_list_content.view.*
 
 @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
 /**
@@ -141,11 +134,36 @@ class ItemListActivity : AppCompatActivity() {
      * Pay attention on synchronously triggered call via execute() method.
      * Its asynchronous equivalent is: enqueue().
      */
-    private fun startMe() {
-        //executor.execute {
+    /*private fun startMe() {
+        Log.i("tag", "Synchronizing data [ START ]")
+        var headers = BackendServiceHeaderMap.obtain()
+        val service = SingletonRetrofit.instance.mySingletonRetrofit!!
+            //val credentials = UserLoginRequest("username", "password")
+            //val tokenResponse = service
+            //        .login(headers, credentials)
+            //        .execute()
+        val tokenResponse = service
+                .getResults("Zucchero")
+                .execute()
+
+        Log.i("tag", "Synchronizing data [ END ]")
+    }*/
+
+    inner class AsyncTaskExample: AsyncTask<String, String, ResultCont?>() {
+
+        override fun onPreExecute() {
+            super.onPreExecute()
+            //MyprogressBar.visibility = View.VISIBLE;
+        }
+
+        override fun doInBackground(vararg p0: String?): ResultCont? {
+
+            var Result: String = "";
+            //It will return current data and time.
+            //startMe()
             Log.i("tag", "Synchronizing data [ START ]")
             var headers = BackendServiceHeaderMap.obtain()
-            val service = JournalerBackendService.obtain()
+            val service = SingletonRetrofit.instance.mySingletonRetrofit!!
             //val credentials = UserLoginRequest("username", "password")
             //val tokenResponse = service
             //        .login(headers, credentials)
@@ -153,45 +171,23 @@ class ItemListActivity : AppCompatActivity() {
             val tokenResponse = service
                     .getResults("Zucchero")
                     .execute()
-            //if (tokenResponse.isSuccessful) {
-            //    val token = tokenResponse.body()
-            //    token?.let {
-            //        TokenManager.currentToken = token
-            //        headers = BackendServiceHeaderMap.obtain(true)
-                    //fetchNotes(service, headers)
-                    //fetchTodos(service, headers)
-            //    }
-            //}
+
+            Log.i("tokenResponse", tokenResponse.toString())
 
             Log.i("tag", "Synchronizing data [ END ]")
-        //}
-    }
 
-    inner class AsyncTaskExample: AsyncTask<String, String, String>() {
-
-        override fun onPreExecute() {
-            super.onPreExecute()
-            //MyprogressBar.visibility = View.VISIBLE;
+            return tokenResponse.body()
         }
 
-        override fun doInBackground(vararg p0: String?): String {
-
-            var Result: String = "";
-            //It will return current data and time.
-            startMe()
-
-            return Result
-        }
-
-        override fun onPostExecute(result: String?) {
+        override fun onPostExecute(result: ResultCont?) {
             super.onPostExecute(result)
 
             //MyprogressBar.visibility = View.INVISIBLE;
 
-            if (result == "") {
-                Log.i("network", "Network Error...Is OK");
+            if (result.toString() == "") {
+                Log.i("network", "Network Error");
             } else {
-                Log.i("network", result);
+                Log.i("network", result.toString());
             }
         }
     }

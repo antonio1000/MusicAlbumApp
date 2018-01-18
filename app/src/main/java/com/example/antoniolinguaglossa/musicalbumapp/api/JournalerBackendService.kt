@@ -1,18 +1,21 @@
 package com.example.antoniolinguaglossa.musicalbumapp.api
 
 import com.example.antoniolinguaglossa.musicalbumapp.model.ResultCont
+import com.example.antoniolinguaglossa.musicalbumapp.util.SingletonRetrofit
 import retrofit2.Call
+import retrofit2.Retrofit
 import retrofit2.http.*
 
 interface JournalerBackendService {
 
-    companion object {
-        fun obtain(): JournalerBackendService {
-            return BackendServiceRetrofit
-                    .obtain()
+    /*companion object {
+        fun obtain(): JournalerBackendService? {
+            return SingletonRetrofit.instance.mySingletonRetrofit!!
                     .create(JournalerBackendService::class.java)
+            //return SingletonRetrofit.instance.mySingletonRetrofit!!.obtain()
+
         }
-    }
+    }*/
 
     @POST("authenticate")
     // @POST("user/authenticate")
@@ -23,7 +26,6 @@ interface JournalerBackendService {
 
     //Uso solo questa...
     @GET("search?")
-            // @GET("entity/note")
     fun getResults(@Query("term") artist : String
     ): Call<ResultCont>
 

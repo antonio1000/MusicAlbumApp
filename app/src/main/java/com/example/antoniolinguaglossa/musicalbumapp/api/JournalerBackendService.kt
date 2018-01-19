@@ -1,9 +1,7 @@
 package com.example.antoniolinguaglossa.musicalbumapp.api
 
 import com.example.antoniolinguaglossa.musicalbumapp.model.ResultCont
-import com.example.antoniolinguaglossa.musicalbumapp.util.SingletonRetrofit
 import retrofit2.Call
-import retrofit2.Retrofit
 import retrofit2.http.*
 
 interface JournalerBackendService {

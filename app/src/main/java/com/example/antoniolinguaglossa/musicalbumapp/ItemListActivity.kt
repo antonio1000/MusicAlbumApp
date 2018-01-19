@@ -5,9 +5,9 @@ import android.os.AsyncTask
 import android.os.Build
 import android.os.Bundle
 import android.support.annotation.RequiresApi
-import android.support.design.widget.Snackbar
 import android.support.v7.app.AppCompatActivity
 import android.support.v7.widget.RecyclerView
+import android.support.v7.widget.SearchView
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
@@ -23,6 +23,8 @@ import com.example.antoniolinguaglossa.musicalbumapp.util.SingletonRetrofit
 import com.squareup.picasso.Picasso
 import kotlinx.android.synthetic.main.activity_item_list.*
 import kotlinx.android.synthetic.main.item_list.*
+
+
 
 @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
 /**
@@ -53,11 +55,27 @@ class ItemListActivity : AppCompatActivity() {
         setSupportActionBar(toolbar)
         toolbar.title = title
 
-        fab.setOnClickListener { view ->
+        searchView.setSubmitButtonEnabled(true)
+        searchView.setQueryHint("Search...")
+
+        searchView.setOnQueryTextListener(object : SearchView.OnQueryTextListener, android.widget.SearchView.OnQueryTextListener {
+            override fun onQueryTextSubmit(query: String): Boolean {
+                AsyncTaskExample().execute(query)
+                return false
+            }
+
+            override fun onQueryTextChange(newText: String): Boolean {
+                return false
+            }
+        })
+        searchView.isSubmitButtonEnabled = true
+
+
+        /*fab.setOnClickListener { view ->
             Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
                     .setAction("Action", null).show()
-                    AsyncTaskExample().execute(searchText.text.toString())
-        }
+                    //AsyncTaskExample().execute(searchText.text.toString())
+        }*/
 
         if (item_detail_container != null) {
             // The detail container view will be present only in the
@@ -68,12 +86,6 @@ class ItemListActivity : AppCompatActivity() {
         }
 
         setupRecyclerView(item_list)
-
-        searchText.setOnClickListener { view ->
-            searchText.setText("")
-        }
-
-        //simpleItemRecyclerViewAdapter.setValues(DummyContent.ITEMS)
     }
 
 
@@ -120,16 +132,11 @@ class ItemListActivity : AppCompatActivity() {
             return ViewHolder(view)
         }
 
-        //TODO: Sistemare accesso allo staticone
         override fun onBindViewHolder(holder: ViewHolder, position: Int) {
             val item = mValues[position]
-            holder.mContentView!!.setText(mValues.get(position).artistName);
-            holder.mContentView2!!.setText(mValues.get(position).trackName);
-            //holder.mContentView3!!.setImageBitmap(mValues.get(position).artworkUrl60);
-            Picasso.with(holder.mContentView3!!.context).load(mValues.get(position).artworkUrl60).into(holder.mContentView3);
-
-            //holder.mIdView.text = item.id
-            //holder.mContentView.text = item.artistName
+            holder.mContentView!!.setText(mValues.get(position).artistName)
+            holder.mContentView2!!.setText(mValues.get(position).trackName)
+            Picasso.with(holder.mContentView3!!.context).load(mValues.get(position).artworkUrl60).into(holder.mContentView3)
 
             with(holder.itemView) {
                 tag = item
@@ -149,8 +156,6 @@ class ItemListActivity : AppCompatActivity() {
         }
 
         inner class ViewHolder(mView: View) : RecyclerView.ViewHolder(mView) {
-            //val mIdView: TextView = mView.id_text
-            //val mContentView: TextView = mView.content
             val mContentView: TextView? = mView.findViewById(R.id.content);
             val mContentView2: TextView? = mView.findViewById(R.id.content2);
             val mContentView3: ImageView? = mView.findViewById(R.id.content3);
@@ -162,13 +167,13 @@ class ItemListActivity : AppCompatActivity() {
 
         override fun onPreExecute() {
             super.onPreExecute()
-            //MyprogressBar.visibility = View.VISIBLE;
+            indeterminateBar.visibility = View.VISIBLE
         }
 
         override fun doInBackground(vararg p0: String?): ResultCont? {
 
             Log.i("tag", "Synchronizing data [ START ]")
-            val s = p0[0];
+            val s = p0[0]
             //var headers = BackendServiceHeaderMap.obtain()
             val service = SingletonRetrofit.instance.mySingletonRetrofit
             //val credentials = UserLoginRequest("username", "password")
@@ -193,13 +198,13 @@ class ItemListActivity : AppCompatActivity() {
             super.onPostExecute(result)
 
             (item_list.adapter as SimpleItemRecyclerViewAdapter).setValues(result?.results!!)
-            //simpleItemRecyclerViewAdapter.setValues(result?.results!!)
-            //MyprogressBar.visibility = View.INVISIBLE;
+
+            indeterminateBar.visibility = View.INVISIBLE
 
             if (result.toString() == "") {
-                Log.i("network", "Network Error");
+                Log.i("network", "Network Error")
             } else {
-                Log.i("network", result.toString());
+                Log.i("network", result.toString())
             }
         }
     }

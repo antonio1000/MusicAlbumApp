@@ -6,8 +6,13 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import com.example.antoniolinguaglossa.musicalbumapp.dummy.DummyContent
+import com.example.antoniolinguaglossa.musicalbumapp.model.Result
+import com.squareup.picasso.Picasso
 import kotlinx.android.synthetic.main.activity_item_detail.*
 import kotlinx.android.synthetic.main.item_detail.view.*
+import com.example.antoniolinguaglossa.musicalbumapp.util.CircleTransform
+
+
 
 /**
  * A fragment representing a single Item detail screen.
@@ -20,7 +25,7 @@ class ItemDetailFragment : Fragment() {
     /**
      * The dummy content this fragment is presenting.
      */
-    private var mItem: DummyContent.DummyItem? = null
+    private var mItem: Result? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -30,8 +35,7 @@ class ItemDetailFragment : Fragment() {
                 // Load the dummy content specified by the fragment
                 // arguments. In a real-world scenario, use a Loader
                 // to load content from a content provider.
-                mItem = DummyContent.ITEM_MAP[it.getString(ARG_ITEM_ID)]
-                activity?.toolbar_layout?.title = mItem?.content
+                mItem = DummyContent.ITEMS[it.getInt(ARG_ITEM_ID)]
             }
         }
     }
@@ -42,8 +46,12 @@ class ItemDetailFragment : Fragment() {
 
         // Show the dummy content as text in a TextView.
         mItem?.let {
-            rootView.item_detail.text = it.details
+            //rootView.item_detail.text = it.details
+            rootView.item_detail.text = it.trackName
+            //Picasso.with(context).load(it.artworkUrl100).into(rootView.item_image)
+            Picasso.with(activity).load(it.artworkUrl100).transform(CircleTransform()).into(rootView.item_image)
         }
+        activity?.toolbar_layout?.title = mItem?.artistName
 
         return rootView
     }

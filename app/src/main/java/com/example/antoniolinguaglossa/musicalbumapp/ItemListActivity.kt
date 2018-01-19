@@ -12,15 +12,17 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.ImageView
 import android.widget.TextView
-import butterknife.BindView
-import com.example.antoniolinguaglossa.musicalbumapp.api.BackendServiceHeaderMap
 import com.example.antoniolinguaglossa.musicalbumapp.dummy.DummyContent
+import com.example.antoniolinguaglossa.musicalbumapp.dummy.DummyContent.ITEMS
+import com.example.antoniolinguaglossa.musicalbumapp.model.Result
 import com.example.antoniolinguaglossa.musicalbumapp.model.ResultCont
+import com.example.antoniolinguaglossa.musicalbumapp.util.MyInterface
 import com.example.antoniolinguaglossa.musicalbumapp.util.SingletonRetrofit
+import com.squareup.picasso.Picasso
 import kotlinx.android.synthetic.main.activity_item_list.*
 import kotlinx.android.synthetic.main.item_list.*
-import kotlinx.android.synthetic.main.item_list_content.view.*
 
 @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
 /**
@@ -41,8 +43,8 @@ class ItemListActivity : AppCompatActivity() {
 
     private var mTwoPane: Boolean = false
 
-    @BindView(R.id.searchText)
-    var textView1: TextView? = null
+    private lateinit var simpleItemRecyclerViewAdapter : SimpleItemRecyclerViewAdapter
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -54,7 +56,7 @@ class ItemListActivity : AppCompatActivity() {
         fab.setOnClickListener { view ->
             Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
                     .setAction("Action", null).show()
-                    AsyncTaskExample().execute();
+                    AsyncTaskExample().execute(searchText.text.toString())
         }
 
         if (item_detail_container != null) {
@@ -66,40 +68,51 @@ class ItemListActivity : AppCompatActivity() {
         }
 
         setupRecyclerView(item_list)
+
+        searchText.setOnClickListener { view ->
+            searchText.setText("")
+        }
+
+        //simpleItemRecyclerViewAdapter.setValues(DummyContent.ITEMS)
     }
+
 
     private fun setupRecyclerView(recyclerView: RecyclerView) {
-        recyclerView.adapter = SimpleItemRecyclerViewAdapter(this, DummyContent.ITEMS, mTwoPane)
-    }
 
-    class SimpleItemRecyclerViewAdapter(private val mParentActivity: ItemListActivity,
-                                        private val mValues: List<DummyContent.DummyItem>,
-                                        private val mTwoPane: Boolean) :
-            RecyclerView.Adapter<SimpleItemRecyclerViewAdapter.ViewHolder>() {
+        simpleItemRecyclerViewAdapter = SimpleItemRecyclerViewAdapter(DummyContent.ITEMS)
 
-        private val mOnClickListener: View.OnClickListener
+        recyclerView.adapter = simpleItemRecyclerViewAdapter
 
-        init {
-            mOnClickListener = View.OnClickListener { v ->
-                val item = v.tag as DummyContent.DummyItem
+        simpleItemRecyclerViewAdapter.setValues(DummyContent.ITEMS)
+        simpleItemRecyclerViewAdapter.onTapListener = object : MyInterface {
+            override fun tapped(pos: Int) {
+                Log.d("Menu position",pos.toString())
                 if (mTwoPane) {
                     val fragment = ItemDetailFragment().apply {
                         arguments = Bundle().apply {
-                            putString(ItemDetailFragment.ARG_ITEM_ID, item.id)
+                            putInt(ItemDetailFragment.ARG_ITEM_ID, pos)
                         }
                     }
-                    mParentActivity.supportFragmentManager
+                    supportFragmentManager
                             .beginTransaction()
                             .replace(R.id.item_detail_container, fragment)
                             .commit()
                 } else {
-                    val intent = Intent(v.context, ItemDetailActivity::class.java).apply {
-                        putExtra(ItemDetailFragment.ARG_ITEM_ID, item.id)
+                    val intent = Intent(this@ItemListActivity, ItemDetailActivity::class.java).apply {
+                        putExtra(ItemDetailFragment.ARG_ITEM_ID, pos)
                     }
-                    v.context.startActivity(intent)
+                    startActivity(intent)
                 }
             }
+
         }
+
+    }
+
+    class SimpleItemRecyclerViewAdapter(private var mValues: List<Result>) :
+            RecyclerView.Adapter<SimpleItemRecyclerViewAdapter.ViewHolder>() {
+
+        lateinit var onTapListener : MyInterface
 
         override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
             val view = LayoutInflater.from(parent.context)
@@ -107,15 +120,28 @@ class ItemListActivity : AppCompatActivity() {
             return ViewHolder(view)
         }
 
+        //TODO: Sistemare accesso allo staticone
         override fun onBindViewHolder(holder: ViewHolder, position: Int) {
             val item = mValues[position]
-            holder.mIdView.text = item.id
-            holder.mContentView.text = item.content
+            holder.mContentView!!.setText(mValues.get(position).artistName);
+            holder.mContentView2!!.setText(mValues.get(position).trackName);
+            //holder.mContentView3!!.setImageBitmap(mValues.get(position).artworkUrl60);
+            Picasso.with(holder.mContentView3!!.context).load(mValues.get(position).artworkUrl60).into(holder.mContentView3);
+
+            //holder.mIdView.text = item.id
+            //holder.mContentView.text = item.artistName
 
             with(holder.itemView) {
                 tag = item
-                setOnClickListener(mOnClickListener)
+                setOnClickListener(View.OnClickListener { onTapListener.tapped(position) })
+
             }
+        }
+
+
+        fun setValues(list : List<Result>)  {
+            mValues = list
+            notifyDataSetChanged()
         }
 
         override fun getItemCount(): Int {
@@ -123,31 +149,14 @@ class ItemListActivity : AppCompatActivity() {
         }
 
         inner class ViewHolder(mView: View) : RecyclerView.ViewHolder(mView) {
-            val mIdView: TextView = mView.id_text
-            val mContentView: TextView = mView.content
+            //val mIdView: TextView = mView.id_text
+            //val mContentView: TextView = mView.content
+            val mContentView: TextView? = mView.findViewById(R.id.content);
+            val mContentView2: TextView? = mView.findViewById(R.id.content2);
+            val mContentView3: ImageView? = mView.findViewById(R.id.content3);
         }
     }
 
-    /**
-     * Authenticates user synchronously,
-     * then executes async calls for notes and TODOs fetching.
-     * Pay attention on synchronously triggered call via execute() method.
-     * Its asynchronous equivalent is: enqueue().
-     */
-    /*private fun startMe() {
-        Log.i("tag", "Synchronizing data [ START ]")
-        var headers = BackendServiceHeaderMap.obtain()
-        val service = SingletonRetrofit.instance.mySingletonRetrofit!!
-            //val credentials = UserLoginRequest("username", "password")
-            //val tokenResponse = service
-            //        .login(headers, credentials)
-            //        .execute()
-        val tokenResponse = service
-                .getResults("Zucchero")
-                .execute()
-
-        Log.i("tag", "Synchronizing data [ END ]")
-    }*/
 
     inner class AsyncTaskExample: AsyncTask<String, String, ResultCont?>() {
 
@@ -158,23 +167,24 @@ class ItemListActivity : AppCompatActivity() {
 
         override fun doInBackground(vararg p0: String?): ResultCont? {
 
-            var Result: String = "";
-            //It will return current data and time.
-            //startMe()
             Log.i("tag", "Synchronizing data [ START ]")
-            var headers = BackendServiceHeaderMap.obtain()
-            val service = SingletonRetrofit.instance.mySingletonRetrofit!!
+            val s = p0[0];
+            //var headers = BackendServiceHeaderMap.obtain()
+            val service = SingletonRetrofit.instance.mySingletonRetrofit
             //val credentials = UserLoginRequest("username", "password")
             //val tokenResponse = service
             //        .login(headers, credentials)
             //        .execute()
             val tokenResponse = service
-                    .getResults("Zucchero")
+                    //.getResults("Zucchero")
+                    .getResults(s!!)
                     .execute()
 
             Log.i("tokenResponse", tokenResponse.toString())
 
             Log.i("tag", "Synchronizing data [ END ]")
+
+            ITEMS = ArrayList(tokenResponse.body()!!.results)
 
             return tokenResponse.body()
         }
@@ -182,6 +192,8 @@ class ItemListActivity : AppCompatActivity() {
         override fun onPostExecute(result: ResultCont?) {
             super.onPostExecute(result)
 
+            (item_list.adapter as SimpleItemRecyclerViewAdapter).setValues(result?.results!!)
+            //simpleItemRecyclerViewAdapter.setValues(result?.results!!)
             //MyprogressBar.visibility = View.INVISIBLE;
 
             if (result.toString() == "") {
@@ -192,3 +204,4 @@ class ItemListActivity : AppCompatActivity() {
         }
     }
 }
+

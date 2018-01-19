@@ -1,7 +1,9 @@
 package com.example.antoniolinguaglossa.musicalbumapp.dummy
 
+import com.example.antoniolinguaglossa.musicalbumapp.model.Result
 import java.util.ArrayList
 import java.util.HashMap
+
 
 /**
  * Helper class for providing sample content for user interfaces created by
@@ -11,33 +13,42 @@ import java.util.HashMap
  */
 object DummyContent {
 
+
     /**
      * An array of sample (dummy) items.
      */
-    val ITEMS: MutableList<DummyItem> = ArrayList()
+    var ITEMS: MutableList<Result> = ArrayList()
 
     /**
      * A map of sample (dummy) items, by ID.
      */
-    val ITEM_MAP: MutableMap<String, DummyItem> = HashMap()
+    //val ITEM_MAP: MutableMap<String, Result> = HashMap()
 
-    private val COUNT = 25
+    /*private val COUNT = 10
 
     init {
         // Add some sample items.
         for (i in 1..COUNT) {
-            addItem(createDummyItem(i))
+            //addItem(createDummyItem(i))
+            //addItem(createDummyItem(id, artistName, collectionName, trackName, artworkUrl60, artworkUrl100, trackPrice, releaseDate)
+            addItem(createDummyItem(i.toString(), "artistName", "collectionName", "trackName", "artworkUrl60", "artworkUrl100", "trackPrice", "releaseDate"))
         }
-    }
+    }*/
 
-    private fun addItem(item: DummyItem) {
+    /*private fun addItem(item: DummyItem) {
         ITEMS.add(item)
         ITEM_MAP.put(item.id, item)
-    }
+    }*/
 
-    private fun createDummyItem(position: Int): DummyItem {
+    //Cancellare
+    /*private fun createDummyItem(position: Int): DummyItem {
         return DummyItem(position.toString(), "Item " + position, makeDetails(position))
-    }
+    }*/
+
+    /*private fun createDummyItem(id: String, artistName: String, collectionName: String, trackName: String, artworkUrl60: String, artworkUrl100: String, trackPrice: String, releaseDate: String): DummyItem {
+
+        return DummyItem(id, artistName, collectionName, trackName, artworkUrl60, artworkUrl100, trackPrice, releaseDate)
+    }*/
 
     private fun makeDetails(position: Int): String {
         val builder = StringBuilder()
@@ -51,7 +62,10 @@ object DummyContent {
     /**
      * A dummy item representing a piece of content.
      */
-    data class DummyItem(val id: String, val content: String, val details: String) {
+    //Cancellare
+    /*data class DummyItem(val id: String, val content: String, val details: String) {
         override fun toString(): String = content
-    }
+    }*/
+
+    //data class DummyItem(val id: String, val artistName: String, val collectionName: String, val trackName: String, val artworkUrl60: String, val artworkUrl100: String, val trackPrice: String, val releaseDate: String)
 }
